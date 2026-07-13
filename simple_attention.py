@@ -19,3 +19,22 @@ print(attn_weights)
 
 all_context_vecs = attn_weights @ inputs
 print(all_context_vecs)
+
+x_2 = inputs[1]
+d_in = inputs.shape[1]
+d_out = 2
+
+# initialise the 2 weight matrix
+torch.manual_seed(123)
+W_query = torch.nn.Parameter(torch.rand(d_in, d_out), requires_grad=False)
+W_key = torch.nn.Parameter(torch.rand(d_in, d_out), requires_grad=False)
+W_value = torch.nn.Parameter(torch.rand(d_in, d_out), requires_grad=False)
+
+query_2 = x_2 @ W_query
+key_2 = x_2 @ W_key
+value_2 = x_2 @ W_value
+print(query_2)
+
+keys = inputs @ W_key
+values = inputs @ W_value
+
