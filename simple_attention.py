@@ -38,3 +38,35 @@ print(query_2)
 keys = inputs @ W_key
 values = inputs @ W_value
 
+keys_2 = keys[1]
+attn_score_22 = query_2.dot(keys_2)
+print(attn_score_22)
+
+attn_score_2 = query_2 @ keys.T 
+d_k = keys.shape[-1]
+attn_weights_2 = torch.softmax(attn_score_2 / d_k**0.5, dim=-1)
+print(attn_weights_2)
+
+context_vec_2 = attn_weights_2 @ values
+print(context_vec_2)
+
+
+import torch.nn as nn
+
+class SelfAttention_v1(nn.Module):
+    def __init__(self, d_in, d_out):
+        super().__init__()
+        self.W_query = nn.Parameter(torch.rand(d_in, d_out))
+        self.W_key = nn.Parameter(torch.rand(d_in, d_out))
+        self.W_value = nn.Parameter(torch.rand(d_in, d_out))
+
+    def forward(self, x):
+        keys = x @ self.W_key
+        queries = x @ self.W_query
+        values = x @ self.W_value
+        attn_scores = queries @ keys.T  # omega
+        attn_weights = torch.softmax(
+            attn_scores / keys.shape[-1]**0.5, dim=-1
+        )
+        context_vec = attn_weights @ values
+        return context_vec
