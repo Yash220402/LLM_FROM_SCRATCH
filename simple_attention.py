@@ -125,3 +125,13 @@ class MultiHeadAttentionWrapper(nn.Module):
     def forward(self, x):
         return torch.cat([head(x) for head in self.heads], dim=-1)
 
+torch.manual_seed(123)
+context_length = batch.shape[1]
+d_in, d_out = 3, 2
+
+mha = MultiHeadAttentionWrapper(
+        d_in, d_out, context_length, 0.0, num_heads=2)
+context_vecs = mha(batch)
+
+print(context_vecs)
+print("context_vecs.shape =", context_vecs)
