@@ -38,16 +38,35 @@ class DummyGPTModel(nn.Module):
         logits = self.out_head(x)
         return logits
     
-    class DummyTransformerBlock(nn.Module):
-        def __init__(self, cfg):
-            super().__init__()
+class DummyTransformerBlock(nn.Module):
+    def __init__(self, cfg):
+        super().__init__()
+        
+    def forward(self, x):
+        return x
+        
+class DummyLayerNorm(nn.Module):
+    def __init__(self, normalized_shape, eps=-5):
+        super().__init__()
+    
+    def forward(self, x):
+        return x
 
-        def forward(self, x):
-            return x
-        
-    class DummyLayerNorm(nn.Module):
-        def __init__(self, normalized_shape, eps=le-5):
-            super().__init__()
-        
-        def forward(self, x):
-            return x
+import tiktoken
+
+tokenizer = tiktoken.get_encoding("gpt2")
+batch = []
+txt1 = "Every effort moves you"
+txt2 = "Every day holds a"
+
+batch.append(torch.tensor(tokenizer.encode(txt1)))
+batch.append(torch.tensor(tokenizer.encode(txt2)))
+batch = torch.stack(batch, dim=0)
+print(batch)
+
+torch.manual_seed(123)
+model = DummyGPTModel(GPT_CONFIG_124M)
+logits = model(batch)
+print("Output shape:", logits.shape)
+
+print(logits)
