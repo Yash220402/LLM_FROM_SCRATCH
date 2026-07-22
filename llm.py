@@ -68,5 +68,20 @@ torch.manual_seed(123)
 model = DummyGPTModel(GPT_CONFIG_124M)
 logits = model(batch)
 print("Output shape:", logits.shape)
-
 print(logits)
+
+torch.manual_seed(123)
+batch_example = torch.randn(2,5)
+layer = nn.Sequential(nn.Linear(5,6), nn.ReLU())
+out = layer(batch_example)
+print(out)
+
+mean = out.mean(dim=-1, keepdim=True)
+var = out.var(dim=-1, keepdim=True)
+
+out_norm = (out - mean) / torch.sqrt(var)
+mean = out_norm.mean(dim=-1, keepdim=True)
+var = out_norm.var(dim=-1, keepdim=True)
+print("Normalised layer outputs: ", out_norm)
+print("Mean:", mean)
+print("Variance:", var)
