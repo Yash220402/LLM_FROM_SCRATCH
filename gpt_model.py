@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import tiktoken
 
 from MultiHeadAttention import MultiHeadAttention
 
@@ -106,14 +107,23 @@ def main():
         "drop_rate": 0.1,       # Dropout rate
         "qkv_bias": False       # Query-Key-Value bias
     }
-    
-    torch.manual_seed(123)
-    x = torch.rand(2, 4, 768)
-    block = TransformerBlock(GPT_CONFIG_124M)
-    output = block(x)
 
-    print("Input shape:", x.shape)
-    print("Output shape:", output.shape)
+    torch.manual_seed(123)
+    model = GPTModel(GPT_CONFIG_124M)
+    model.eval()
+
+    start_context = "Hello, I am"
+
+    tokenizer = tiktoken.get_encoding("gpt_2")
+    encoded = tokenizer.encode(start_context)
+    encoded_tensor = torch.tensor(encoded).unsqueeze(0)
+
+    print(f"\n{50*'='}\n{22*' '}IN\n{50*'='}")
+    print("\nInput text:", start_context)
+    print("Encoded input text:", encoded)
+    print("encoded_tensor.shape:", encoded_tensor.shape)
+
+
 
 if __name__ == "__main__":
     main()
