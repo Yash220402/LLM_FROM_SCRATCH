@@ -179,6 +179,7 @@ model_without_shortcut = ExampleDeepNeuralNetwork(
 def print_gradients(model, x):
     output = model(x)
     target = torch.tensor([[0.]])
+
     loss = nn.MSELoss()
     loss = loss(output, target)
     loss.backward()
@@ -186,3 +187,5 @@ def print_gradients(model, x):
     for name, param in model.named_parameters():
         if 'weight' in name:
             print(f"{name} has gradient mean of {param.grad.abs().mean().item()}")
+
+print_gradients(model_without_shortcut, sample_input)
