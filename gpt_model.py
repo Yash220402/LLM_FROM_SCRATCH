@@ -127,7 +127,7 @@ def main():
     model = GPTModel(GPT_CONFIG_124M)
     model.eval()
 
-    start_context = "Hello, I am"
+    start_context = "Hey there buddy"
 
     tokenizer = tiktoken.get_encoding("gpt2")
     encoded = tokenizer.encode(start_context)
