@@ -77,15 +77,8 @@ def main(gpt_config, settings):
             file.write(text_data)
     else:
         with open(file_path, "r", encoding="utf-8") as file:
-            file.read(text_data)
-
-    # initialize model 
-    model = GPTModel(gpt_config)
-    model.to(device)
-    optimzer = torch.optim.AdamW(
-        model.parameters(), lr=settings['learning_rate'], weight_decay=settings["weight_decay"]
-    )
-
+            text_data = file.read()
+    
     # set up dataloaders
     train_ratio = 0.90
     split_idx = int(train_ratio * len(text_data))
@@ -110,9 +103,11 @@ def main(gpt_config, settings):
         num_workers=0
     )
 
+    return train_loader, val_loader
 
-    if __name__ == "__main__":
-        GPT_CONFIG_124M = {
+
+if __name__ == "__main__":
+    GPT_CONFIG_124M = {
         "vocab_size": 50257,    # Vocabulary size
         "context_length": 256,  # Shortened context length (orig: 1024)
         "emb_dim": 768,         # Embedding dimension
@@ -128,3 +123,11 @@ def main(gpt_config, settings):
         "batch_size": 2,
         "weight_decay": 0.1
     }
+
+    train_loader, val_loader = main(gpt_config=GPT_CONFIG_124M, settings=OTHER_SETTINGS)
+    print("Train loader:")
+    for x, y in train_loader:
+        print(x.shape, y.shape)
+    print("\nValidation loader:")
+    for x, y in val_loader:
+        print(x.shape, y.shape)
