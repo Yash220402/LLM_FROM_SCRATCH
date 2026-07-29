@@ -31,7 +31,7 @@ def token_ids_to_text(token_ids, tokenizer):
 def calc_loss_batch(input_batch, target_batch, model, device):
     input_batch, target_batch = input_batch.to(device), target_batch.to(device)
     logits = model(input_batch)
-    loss = torch.nn.function.cross_entropy(logits.flatten(0, 1), target_batch.flatten())
+    loss = torch.nn.functional.cross_entropy(logits.flatten(0, 1), target_batch.flatten())
     return loss
 
 def calc_loss_loader(data_loader, model, device, num_batches=None):
@@ -103,7 +103,13 @@ def main(gpt_config, settings):
         num_workers=0
     )
 
-    return train_loader, val_loader
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device=device)
+    with torch.no_grad():
+        train_loss = calc_loss_loader(train_loader, model, device)
+        val_loss = calc_loss_loader(val_loader, model, device)
+    print("Training loss:", train_loss)
+    print("Validation loss:", val_loss)
 
 
 if __name__ == "__main__":
@@ -124,10 +130,4 @@ if __name__ == "__main__":
         "weight_decay": 0.1
     }
 
-    train_loader, val_loader = main(gpt_config=GPT_CONFIG_124M, settings=OTHER_SETTINGS)
-    print("Train loader:")
-    for x, y in train_loader:
-        print(x.shape, y.shape)
-    print("\nValidation loader:")
-    for x, y in val_loader:
-        print(x.shape, y.shape)
+    main(gpt_config=GPT_CONFIG_124M, settings=OTHER_SETTINGS)
