@@ -31,11 +31,14 @@ class GPTDataSetV1(Dataset):
     
 
 def create_dataloader_v1(txt, 
-                         batch_size=4, max_length=256, stride=128, 
+                         batch_size, max_length, stride, 
                          shuffle=True, drop_last=True,
                          num_workers=0):
+    
     tokenizer = tiktoken.get_encoding("gpt2")
+
     dataset = GPTDataSetV1(txt, tokenizer, max_length, stride)
+
     dataloader = DataLoader(
         dataset,
         batch_size=batch_size,

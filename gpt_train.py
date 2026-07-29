@@ -1,6 +1,7 @@
 import torch
 import tiktoken
 from gpt_model import GPTModel, generate_text_simple
+from dataloader import create_dataloader_v1
 
 GPT_CONFIG_124M = {
     "vocab_size": 50257,
@@ -24,73 +25,34 @@ def token_ids_to_text(token_ids, tokenizer):
     flat = token_ids.squeeze(0)
     return tokenizer.decode(flat.tolist())
 
-start_context = "Every effor moves you"
-tokenizer = tiktoken.get_encoding("gpt2")
+def calc_loss_batch(input_batch, target_batch, model, device):
+    input_batch, target_batch = input_batch.to(device), target_batch.to(device)
+    logits = model(input_batch)
+    loss = torch.nn.function.cross_entropy(logits.flatten(0, 1), target_batch.flatten())
+    return loss
 
-token_ids = generate_text_simple(
-    model = model,
-    idx = text_to_token_ids(start_context, tokenizer),
-    max_new_tokens=10, 
-    context_size=(GPT_CONFIG_124M["context_length"])
-)
+def calc_loss_loader(data_loader, model, device, num_batches=None):
+    total_loss = 0.
+    if len(data_loader) == 0:
+        return float("nan")
+    elif num_batches is None:
+        num_batches = len(data_loader)
+    else:
+        num_batches = min(num_batches, len(data_loader))
+    for i, (input_batch, target_batch) in enumerate(data_loader):
+        if i < num_batches:
+            loss = calc_loss_batch(input_batch, target_batch, model, device)
+            total_loss += loss.item()
+        else:
+            break
 
-print("Output text:\n", token_ids_to_text(token_ids, tokenizer))
-
-inputs = torch.tensor([[16833, 3626, 6100], # ["every effort moves",
-                        [40, 1107, 588]]) # "I really like"]
-
-targets = torch.tensor([[3626, 6100, 345 ], # [" effort moves you",
-                        [1107, 588, 11311]]) # " really like chocolate"]
-
-with torch.no_grad():
-    logits = model(inputs)
-    probas = torch.softmax(logits, dim=-1)
-    print(probas.shape)
-
-token_ids = torch.argmax(probas, dim=-1, keepdim=True)
-print("Token IDs:\n", token_ids)
-
-print(f"Targets batch 1: {token_ids_to_text(targets[0], tokenizer)}")
-print(f"Outputs batch 1:"
-      f" {token_ids_to_text(token_ids[0].flatten(), tokenizer)}")
-
-text_idx = 0
-target_probas_1 = probas[text_idx, [0,1,2], targets[text_idx]]
-print("Text 1:", target_probas_1)
-
-text_idx = 1
-target_probas_2 = probas[text_idx, [0,1,2], targets[text_idx]]
-print("Text 2:", target_probas_2)
-
-log_probas = torch.log(torch.cat((target_probas_1, target_probas_2)))
-print(log_probas)
-
-avg_log_probas = torch.mean(log_probas)
-print(avg_log_probas)
-
-logits_flat = logits.flatten(0, 1)
-targets_flat = targets.flatten()
-print("Flattened Logits:", logits_flat.shape)
-print("Flattened targets:", targets_flat.shape)
-
-loss = torch.nn.functional.cross_entropy(logits_flat, targets_flat)
-print(loss)
-
-file_path = "the-verdict.txt"
-with open(file_path, "r", encoding="utf-8") as file:
-    text_data = file.read()
-
-total_characters = len(text_data)
-total_tokens = len(tokenizer.encode(text_data))
-print("Characters:", total_characters)
-print("Tokens:", total_tokens)
+    return total_loss / num_batches
 
 train_ratio = 0.90
 split_idx = int(train_ratio * len(text_data))
 train_data = text_data[:split_idx]
 val_data = text_data[split_idx:]
 
-from dataloader import create_dataloader_v1
 torch.manual_seed(123)
 
 train_loader = create_dataloader_v1(
@@ -113,9 +75,9 @@ val_loader = create_dataloader_v1(
 )
 
 print("Train loader:")
-for x, y, in train_loader:
+for x, y in train_loader:
     print(x.shape, y.shape)
 
 print("\nValidation loader:")
-for x, y, in val_loader:
+for x, y in val_loader:
     print(x.shape, y.shape)
