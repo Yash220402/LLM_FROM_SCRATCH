@@ -153,7 +153,16 @@ def main(gpt_config, settings):
         num_workers=0
     )
 
-    
+    # train model
+    tokenizer = tiktoken.get_encoding("gpt2")
+
+    train_losses, val_losses, tokens_seen = train_model_simple(
+        model, train_loader, val_loader, optimizer, device,
+        num_epochs=settings["num_epochs"], eval_freq=5, eval_iter=1,
+        start_context="Every effort moves you", tokenizer=tokenizer
+    )
+
+    return train_losses, val_losses, tokens_seen, model
 
 
 if __name__ == "__main__":
@@ -174,4 +183,5 @@ if __name__ == "__main__":
         "weight_decay": 0.1
     }
 
-    main(gpt_config=GPT_CONFIG_124M, settings=OTHER_SETTINGS)
+    # initiate training
+    train_losses, val_losses, tokens_seen, model = main(gpt_config=GPT_CONFIG_124M, settings=OTHER_SETTINGS)
