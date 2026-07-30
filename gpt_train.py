@@ -6,6 +6,9 @@ import tiktoken
 from gpt_model import GPTModel, generate_text_simple
 from dataloader import create_dataloader_v1
 
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
+
 GPT_CONFIG_124M = {
     "vocab_size": 50257,
     "context_length": 256,
@@ -104,6 +107,22 @@ def train_model_simple(model, train_loader, val_loader,
         )
     return train_loss, val_loss, track_tokens_seen
 
+def plot_losses(epochs_seen, tokens_seen, train_losses, val_losses):
+    fig, ax1 = plt.subplots(figsize=(5,3))
+    ax1.plot(epochs_seen, train_losses, label="Training Loss")
+    ax1.plot(
+        epochs_seen, val_losses, linestyle="-.", label="Validation Loss"
+    )
+    ax1.set_xlabel("Epochs")
+    ax1.set_ylabel("Loss")
+    ax1.legend(loc="upper right")
+    ax1.xaxis.set_major_locator(MaxNLocator(integer=True))
+    ax2 = ax1.twiny()
+    ax2.plot(tokens_seen, train_losses, alpha=0)
+    ax2.set_xlabel("Tokens seen")
+    fig.tight_layout()
+    plt.show()
+
 def main(gpt_config, settings):
     torch.manual_seed(123)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -185,3 +204,6 @@ if __name__ == "__main__":
 
     # initiate training
     train_losses, val_losses, tokens_seen, model = main(gpt_config=GPT_CONFIG_124M, settings=OTHER_SETTINGS)
+
+    epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
+    plot_losses(epochs_tensor, tokens_seen, train_losses, val_losses)
