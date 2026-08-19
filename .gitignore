@@ -1,0 +1,51 @@
+# Python / virtual environments
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.venv/
+.venv/
+venv/
+ENV/
+env/
+
+# Unit test / coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Logs
+*.log
+
+# Build / packaging
+build/
+dist/
+*.whl
+pip-wheel-metadata/
+
+# IDEs / editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ML / model artifacts
+checkpoints/
+checkpoint/
+models/
+runs/
+logs/
+wandb/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+*.onnx
+
+# OS files
+.DS_Store
+Thumbs.db
